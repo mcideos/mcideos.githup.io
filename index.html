@@ -1,564 +1,132 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Módulo: Actos Urgentes de Comprobación (AUC) — Insertable LMS</title>
-  <style>
-    :root{
-      --bg: #0f1724;
-      --card: #0b1220;
-      --accent: #0ea5a4;
-      --muted: #9aa6b2;
-      --glass: rgba(255,255,255,0.03);
-      --success: #16a34a;
-      --danger: #ef4444;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadena de Custodia Interactiva</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #e0e0e0;
+    margin: 0;
+    padding: 40px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1f2937;
+  }
+
+  .chain {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .link {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(145deg, #e5e7eb, #d1d5db);
+    border-radius: 50%;
+    border: 3px solid #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111827;
+    font-weight: bold;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  }
+
+  .link:hover {
+    background: #ebb970;
+    color: white;
+    border-color: #333652;
+    transform: scale(1.1);
+  }
+
+  .link::after {
+    content: "";
+    position: absolute;
+    width: 80px;
+    height: 4px;
+    background: #9ca3af;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: -1;
+  }
+
+  .link:last-child::after {
+    display: none;
+  }
+
+  .tooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    width: 180px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .link:hover .tooltip {
+    opacity: 1;
+    bottom: 110%;
+  }
+
+  @media (max-width: 700px) {
+    .chain {
+      flex-direction: column;
+      align-items: center;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg,#071024 0%, #071029 100%);
-      color:#e6eef6;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding:20px;
+    .link::after {
+      width: 4px;
+      height: 60px;
+      right: 50%;
+      top: 100%;
+      transform: translateX(50%);
     }
-    .container{
-      max-width:1100px;
-      margin:0 auto;
-    }
-    header{
-      display:flex;
-      gap:16px;
-      align-items:center;
-      margin-bottom:18px;
-    }
-    .logo{
-      width:64px;height:64px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#38bdf8);
-      display:flex;align-items:center;justify-content:center;font-weight:700;color:#042029;
-      box-shadow:0 6px 18px rgba(2,6,23,0.6);
-    }
-    h1{font-size:20px;margin:0}
-    p.lead{margin:4px 0 0;color:var(--muted)}
-    main{
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap:20px;
-      align-items:start;
-    }
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);
-      box-shadow:0 6px 18px rgba(2,6,23,0.6);
-    }
-    /* Left column content */
-    .content h2{margin-top:0}
-    .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-    .tab{
-      padding:8px 12px;border-radius:8px;background:var(--glass);cursor:pointer;color:var(--muted);font-weight:600;
-    }
-    .tab.active{background:linear-gradient(90deg,var(--accent),#38bdf8);color:#042029}
-    .section{display:none}
-    .section.active{display:block}
-    .accordion-item{border-top:1px solid rgba(255,255,255,0.03);padding:10px 0}
-    .accordion-title{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-    .accordion-body{margin-top:8px;color:var(--muted);line-height:1.5}
-    table{width:100%;border-collapse:collapse;margin-top:8px}
-    th,td{padding:8px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:14px}
-    .muted{color:var(--muted);font-size:13px}
-    /* Right column / sidebar */
-    .sidebar .card{margin-bottom:12px}
-    .btn{
-      display:inline-block;padding:10px 14px;border-radius:8px;background:var(--accent);color:#042029;font-weight:700;text-decoration:none;border:none;
-      cursor:pointer;
-    }
-    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
-    /* Drag & drop activity */
-    .dnd{
-      display:flex;gap:12px;flex-wrap:wrap;
-    }
-    .dnd .items{flex:1;min-width:220px}
-    .draggable{
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      padding:10px;border-radius:8px;margin:8px 0;border:1px solid rgba(255,255,255,0.03);cursor:grab;
-    }
-    .dropzone{
-      min-height:160px;border:2px dashed rgba(255,255,255,0.04);border-radius:10px;padding:10px;
-      display:flex;flex-direction:column;gap:8px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-    }
-    .dropzone.over{border-color:rgba(78,222,199,0.6)}
-    .small{font-size:13px;color:var(--muted)}
-    .result{margin-top:10px;padding:10px;border-radius:8px}
-    .result.ok{background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.12);color:var(--success)}
-    .result.bad{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.08);color:var(--danger)}
-    /* Quiz */
-    .question{margin-bottom:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
-    .options{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-    .option{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-    .option.selected{outline:2px solid rgba(14,165,164,0.2);background:rgba(14,165,164,0.03)}
-    .feedback{margin-top:8px;font-size:13px}
-    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
-    /* Responsive */
-    @media (max-width:980px){
-      main{grid-template-columns:1fr; padding-bottom:40px}
-      .sidebar{order:2}
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="container" role="main">
-    <header>
-      <div class="logo" aria-hidden="true">AUC</div>
-      <div>
-        <h1>Módulo Interactivo — Actos Urgentes de Comprobación (AUC)</h1>
-        <p class="lead">Material didáctico basado en el documento: <strong>Actos Urgentes de Comprobación en El Salvador</strong>. Listo para insertar en LMS.</p>
-      </div>
-    </header>
 
-    <main>
-      <!-- LEFT: content -->
-      <section class="card content" aria-labelledby="module-title">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <h2 id="module-title">Contenido del módulo</h2>
-          <div class="small muted">Duración estimada: 20-30 minutos</div>
-        </div>
+<h2>🔗 Cadena de Custodia</h2>
 
-        <div class="tabs" role="tablist" aria-label="Secciones">
-          <div class="tab active" data-tab="intro" role="tab" tabindex="0">Introducción</div>
-          <div class="tab" data-tab="tipos" role="tab" tabindex="0">Tipos de actos</div>
-          <div class="tab" data-tab="ejemplos" role="tab" tabindex="0">Ejemplos</div>
-          <div class="tab" data-tab="cadena" role="tab" tabindex="0">Cadena de Custodia</div>
-          <div class="tab" data-tab="valor" role="tab" tabindex="0">Valor en Juicio</div>
-          <div class="tab" data-tab="actividad" role="tab" tabindex="0">Actividad</div>
-          <div class="tab" data-tab="quiz" role="tab" tabindex="0">Autoevaluación</div>
-        </div>
-
-        <!-- INTRO -->
-        <article id="intro" class="section active" role="tabpanel">
-          <h3>1. Introducción y Fundamento</h3>
-          <p>El proceso penal salvadoreño exige prueba legal para condenar. <strong>Los Actos Urgentes de Comprobación (AUC)</strong> son las acciones inmediatas para asegurar la prueba antes de que desaparezca o se altere.</p>
-          <div class="accordion-item">
-            <div class="accordion-title" data-acc="fundamento">
-              <strong>Base legal: Dirección de la Investigación</strong>
-              <span class="small muted">ver</span>
-            </div>
-            <div class="accordion-body" id="fundamento" hidden>
-              <p class="muted"><strong>Art. 193, numeral 3</strong> — Otorga a la Fiscalía General de la República la potestad de dirigir la investigación con la colaboración de la PNC.<br>
-              <strong>Art. 304 del CPP</strong> — Establece que el fiscal practicará actos urgentes que no requieran autorización judicial y solicitará al juez los que sí la requieran.</p>
-            </div>
-          </div>
-        </article>
-
-        <!-- TIPOS -->
-        <article id="tipos" class="section" role="tabpanel">
-          <h3>2. Tipos de Actos Urgentes</h3>
-          <p>La clave para determinar la validez es si el acto afecta derechos fundamentales (domicilio, intimidad, integridad corporal, comunicaciones).</p>
-
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
-            <div style="flex:1;min-width:220px">
-              <h4>Actos <em>sin</em> intervención judicial</h4>
-              <p class="muted">Practica la FGR o la PNC cuando no se vulneran derechos fundamentales o la actuación es inmediata.</p>
-            </div>
-            <div style="flex:1;min-width:220px">
-              <h4>Actos <em>con</em> intervención judicial</h4>
-              <p class="muted">Requieren orden del Juez: afectan domicilio, comunicaciones privadas o integridad corporal sin consentimiento.</p>
-            </div>
-          </div>
-        </article>
-
-        <!-- EJEMPLOS -->
-        <article id="ejemplos" class="section" role="tabpanel">
-          <h3>3. Ejemplos específicos</h3>
-          <p class="muted">A continuación se listan actos comunes y si, por regla general, requieren orden judicial.</p>
-
-          <table aria-describedby="ejemplos-desc">
-            <thead>
-              <tr><th>Acto</th><th>¿Requiere Juez?</th><th>Base legal (CPP)</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Inspección en el lugar de los hechos</td><td>NO (regla general)</td><td>Arts. 186, 271, 272</td></tr>
-              <tr><td>Allanamiento de morada</td><td>SÍ (regla general)</td><td>Art. 211 (excepciones: flagrancia)</td></tr>
-              <tr><td>Requisa personal / registro de vehículos</td><td>NO (si hay motivos fundados)</td><td>Arts. 209, 210</td></tr>
-              <tr><td>Exámenes/intervenciones corporales</td><td>SÍ (si no consiente)</td><td>Art. 200</td></tr>
-              <tr><td>Interceptación de comunicaciones</td><td>SÍ (siempre)</td><td>Arts. 205-207</td></tr>
-              <tr><td>Autopsia</td><td>NO (deber)</td><td>Art. 202</td></tr>
-              <tr><td>Exhumación</td><td>SÍ</td><td>Art. 204</td></tr>
-              <tr><td>Secuestro/incautación documentos sensibles</td><td>SÍ</td><td>Art. 218</td></tr>
-            </tbody>
-          </table>
-
-          <div class="accordion-item">
-            <div class="accordion-title" data-acc="antc">
-              <strong>Anticipo jurisdiccional de prueba (Art. 305)</strong>
-              <span class="small muted">ver</span>
-            </div>
-            <div class="accordion-body" id="antc" hidden>
-              <p class="muted">Si una prueba corre riesgo de no estar disponible en el juicio, el Juez puede tomarla anticipadamente, con la presencia de la defensa.</p>
-            </div>
-          </div>
-        </article>
-
-        <!-- CADENA -->
-        <article id="cadena" class="section" role="tabpanel">
-          <h3>4. Cadena de Custodia</h3>
-          <p>Definición: registro documental que asegura la autenticidad e integridad de la evidencia desde su hallazgo hasta su presentación en juicio.</p>
-          <p class="muted">Consecuencia de la falla: la prueba puede declararse nula si la cadena se rompe. Base legal: <strong>Art. 259 del CPP</strong>.</p>
-        </article>
-
-        <!-- VALOR EN JUICIO -->
-        <article id="valor" class="section" role="tabpanel">
-          <h3>5. De acto a prueba — Valor en el juicio</h3>
-          <p>Los AUC se convierten en prueba cuando sus resultados (informes, peritajes, testimonios) ingresan legalmente al juicio oral y público.</p>
-          <p class="muted">Excepción: el anticipo jurisdiccional (Art. 305) cuando la prueba corre riesgo de perderse.</p>
-        </article>
-
-        <!-- ACTIVIDAD -->
-        <article id="actividad" class="section" role="tabpanel">
-          <h3>6. Actividad interactiva: ¿Requiere autorización judicial?</h3>
-          <p class="muted">Arrastra cada acto a la zona correspondiente: <strong>Requiere orden</strong> o <strong>No requiere orden</strong>.</p>
-
-          <div class="dnd" aria-live="polite">
-            <div class="items" style="flex:0.5">
-              <div class="muted">Arrastra:</div>
-              <div id="itemsList">
-                <div class="draggable" draggable="true" data-id="allanamiento">Allanamiento de morada</div>
-                <div class="draggable" draggable="true" data-id="inspeccion">Inspección en lugar de hechos</div>
-                <div class="draggable" draggable="true" data-id="interceptacion">Interceptación de comunicaciones</div>
-                <div class="draggable" draggable="true" data-id="requisa">Requisa personal / registro vehículo</div>
-                <div class="draggable" draggable="true" data-id="autopsia">Autopsia</div>
-                <div class="draggable" draggable="true" data-id="examenes">Exámenes corporales sin consentimiento</div>
-              </div>
-            </div>
-
-            <div style="flex:1">
-              <div style="display:flex;gap:10px">
-                <div style="flex:1">
-                  <div class="small muted">NO requiere orden</div>
-                  <div id="dropNo" class="dropzone" aria-dropeffect="move" data-accept="no">
-                    <!-- dropped items -->
-                  </div>
-                </div>
-                <div style="flex:1">
-                  <div class="small muted">SÍ requiere orden</div>
-                  <div id="dropYes" class="dropzone" aria-dropeffect="move" data-accept="yes"></div>
-                </div>
-              </div>
-
-              <div style="margin-top:12px;display:flex;gap:8px">
-                <button id="checkDnd" class="btn">Verificar actividad</button>
-                <button id="resetDnd" class="btn secondary">Reiniciar</button>
-                <div id="dndResult" style="margin-left:auto"></div>
-              </div>
-
-              <div id="dndFeedback" class="result" style="display:none"></div>
-            </div>
-          </div>
-
-        </article>
-
-        <!-- QUIZ -->
-        <article id="quiz" class="section" role="tabpanel">
-          <h3>7. Autoevaluación</h3>
-          <p class="muted">Responde las preguntas y presiona "Enviar respuestas" para ver tu puntaje y retroalimentación.</p>
-
-          <div id="quizContainer">
-            <!-- Question 1 -->
-            <div class="question" data-q="1">
-              <div><strong>1.</strong> ¿Qué artículo del CPP regula la dirección de la investigación y los actos urgentes de comprobación?</div>
-              <div class="options">
-                <div class="option" data-value="a">Art. 193</div>
-                <div class="option" data-value="b">Art. 304</div>
-                <div class="option" data-value="c">Art. 259</div>
-              </div>
-              <div class="feedback" aria-live="polite"></div>
-            </div>
-
-            <!-- Q2 -->
-            <div class="question" data-q="2">
-              <div><strong>2.</strong> ¿Cuál de estos actos <em>generalmente</em> no requiere orden judicial?</div>
-              <div class="options">
-                <div class="option" data-value="a">Allanamiento de morada</div>
-                <div class="option" data-value="b">Interceptación de comunicaciones</div>
-                <div class="option" data-value="c">Inspección en lugar de los hechos</div>
-              </div>
-              <div class="feedback"></div>
-            </div>
-
-            <!-- Q3 -->
-            <div class="question" data-q="3">
-              <div><strong>3.</strong> La ruptura de la cadena de custodia provoca:</div>
-              <div class="options">
-                <div class="option" data-value="a">Que la prueba sea más confiable</div>
-                <div class="option" data-value="b">Que la prueba pueda declararse nula</div>
-                <div class="option" data-value="c">Nada; la prueba sigue igual</div>
-              </div>
-              <div class="feedback"></div>
-            </div>
-
-            <!-- Q4 -->
-            <div class="question" data-q="4">
-              <div><strong>4.</strong> ¿Cuál artículo regula la cadena de custodia en el CPP?</div>
-              <div class="options">
-                <div class="option" data-value="a">Art. 259</div>
-                <div class="option" data-value="b">Art. 211</div>
-                <div class="option" data-value="c">Art. 205</div>
-              </div>
-              <div class="feedback"></div>
-            </div>
-
-            <!-- Q5 -->
-            <div class="question" data-q="5">
-              <div><strong>5.</strong> ¿Qué procedimiento se usa cuando una prueba corre riesgo de no estar disponible para juicio?</div>
-              <div class="options">
-                <div class="option" data-value="a">Allanamiento sin orden</div>
-                <div class="option" data-value="b">Anticipo jurisdiccional de prueba</div>
-                <div class="option" data-value="c">Requisa personal</div>
-              </div>
-              <div class="feedback"></div>
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button id="submitQuiz" class="btn">Enviar respuestas</button>
-              <button id="resetQuiz" class="btn secondary">Reiniciar</button>
-              <button id="exportResults" class="btn secondary" title="Genera JSON con resultados para integrar en LMS">Exportar (JSON)</button>
-              <div id="quizScore" style="margin-left:auto" class="small muted"></div>
-            </div>
-          </div>
-
-        </article>
-
-      </section>
-
-      <!-- RIGHT: sidebar -->
-      <aside class="sidebar">
-        <div class="card">
-          <h4>Instrucciones de uso</h4>
-          <ol class="muted">
-            <li>Sube este archivo HTML a tu LMS como contenido web (recurso HTML) o usa un <em>iframe</em> apuntando al archivo.</li>
-            <li>Recomienda a los estudiantes explorar las pestañas, completar la actividad y la autoevaluación.</li>
-            <li>Usa el botón <strong>Exportar (JSON)</strong> para guardar resultados del quiz.</li>
-          </ol>
-          <div style="margin-top:8px">
-            <a class="btn" id="btnStart">Empezar módulo</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <h4>Recursos y referencias</h4>
-          <p class="muted">Incluye referencias citadas en el material: Art. 193, Art. 304, Art. 259, Arts. 186, 209-211, 200-207, 202, 204, 218 y Art. 305 (CPP).</p>
-        </div>
-
-        <div class="card">
-          <h4>Notas para el docente</h4>
-          <ul class="muted">
-            <li>Duración sugerida: 20–30 min.</li>
-            <li>Actividad práctica incluida (arrastrar/soltar).</li>
-            <li>Puedes solicitar la exportación JSON y guardarla en el expediente del estudiante.</li>
-          </ul>
-        </div>
-      </aside>
-    </main>
-
-    <footer>
-      <div>Creado para integración LMS • Material: Actos Urgentes de Comprobación en El Salvador</div>
-    </footer>
+<div class="chain">
+  <div class="link">1️⃣
+    <div class="tooltip">Recolección: obtención de la evidencia en el lugar de los hechos, asegurando su integridad.</div>
   </div>
+  <div class="link">2️⃣
+    <div class="tooltip">Embalaje: colocación de la evidencia en recipientes adecuados, sellados y etiquetados.</div>
+  </div>
+  <div class="link">3️⃣
+    <div class="tooltip">Traslado: transporte seguro hacia laboratorios o depósitos designados.</div>
+  </div>
+  <div class="link">4️⃣
+    <div class="tooltip">Almacenamiento: conservación bajo condiciones controladas y registro en inventarios.</div>
+  </div>
+  <div class="link">5️⃣
+    <div class="tooltip">Presentación en juicio: exhibición formal de la evidencia ante el tribunal.</div>
+  </div>
+</div>
 
-  <script>
-    // Tabs logic
-    document.querySelectorAll('.tab').forEach(t => {
-      t.addEventListener('click', ()=> activateTab(t.dataset.tab));
-      t.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') activateTab(t.dataset.tab); });
-    });
-    function activateTab(name){
-      document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name));
-      document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===name));
-      // scroll to top of module area for accessibility
-      document.querySelector('.container').scrollIntoView({behavior:'smooth'});
-    }
-
-    // Accordion logic
-    document.querySelectorAll('[data-acc]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const id = btn.getAttribute('data-acc');
-        const el = document.getElementById(id);
-        if(!el) return;
-        const isHidden = el.hasAttribute('hidden');
-        document.querySelectorAll('.accordion-body').forEach(b=>b.setAttribute('hidden',''));
-        if(isHidden) el.removeAttribute('hidden');
-      });
-    });
-
-    // DnD logic
-    const draggables = document.querySelectorAll('.draggable');
-    draggables.forEach(d=>{
-      d.addEventListener('dragstart', dragStart);
-      d.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ d.setAttribute('aria-grabbed','true'); }});
-    });
-    function dragStart(e){
-      e.dataTransfer.setData('text/plain', e.target.dataset.id);
-      e.dataTransfer.effectAllowed = 'move';
-    }
-
-    const dropNo = document.getElementById('dropNo');
-    const dropYes = document.getElementById('dropYes');
-    [dropNo, dropYes].forEach(zone=>{
-      zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('over');});
-      zone.addEventListener('dragleave', e=>{ zone.classList.remove('over');});
-      zone.addEventListener('drop', e=>{
-        e.preventDefault();
-        zone.classList.remove('over');
-        const id = e.dataTransfer.getData('text/plain');
-        const el = document.querySelector('.draggable[data-id="'+id+'"]');
-        if(!el) return;
-        // append clone (move)
-        zone.appendChild(el);
-      });
-    });
-
-    // drag & drop keyboard accessibility: basic (Enter to move to first empty dropzone)
-    draggables.forEach(d=>{
-      d.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter'){
-          // toggle between zones
-          if(dropNo.contains(d)){ dropYes.appendChild(d); } else if(dropYes.contains(d)){ dropNo.appendChild(d); }
-          else { dropNo.appendChild(d); }
-        }
-      });
-    });
-
-    // Check DnD answers
-    const correctMapping = {
-      allanamiento: 'yes',
-      inspeccion: 'no',
-      interceptacion: 'yes',
-      requisa: 'no',
-      autopsia: 'no',
-      examenes: 'yes'
-    };
-    document.getElementById('checkDnd').addEventListener('click', ()=>{
-      const assigned = {};
-      // find all draggables and their parent zone
-      document.querySelectorAll('.draggable').forEach(d=>{
-        const parent = d.parentElement;
-        let zone = null;
-        if(parent === dropNo || parent.closest('#dropNo')) zone = 'no';
-        if(parent === dropYes || parent.closest('#dropYes')) zone = 'yes';
-        assigned[d.dataset.id] = zone;
-      });
-      // score
-      let total = 0, correct = 0;
-      for(const key in correctMapping){ total++; if(assigned[key] === (correctMapping[key] === 'yes' ? 'yes' : 'no')) correct++; }
-      const feedback = document.getElementById('dndFeedback');
-      feedback.style.display = 'block';
-      if(correct === total){
-        feedback.className = 'result ok';
-        feedback.textContent = `Perfecto — todas las respuestas son correctas (${correct}/${total}).`;
-      } else {
-        feedback.className = 'result bad';
-        feedback.textContent = `Respuestas correctas: ${correct} de ${total}. Revisa los actos y su necesidad de autorización judicial.`;
-      }
-    });
-
-    document.getElementById('resetDnd').addEventListener('click', ()=>{
-      const list = document.getElementById('itemsList');
-      const order = ['allanamiento','inspeccion','interceptacion','requisa','autopsia','examenes'];
-      order.forEach(id=>{
-        const el = document.querySelector('.draggable[data-id="'+id+'"]');
-        if(el) list.appendChild(el);
-      });
-      document.getElementById('dndFeedback').style.display='none';
-    });
-
-    // Quiz logic
-    const answers = {
-      1: 'b',
-      2: 'c',
-      3: 'b',
-      4: 'a',
-      5: 'b'
-    };
-    document.querySelectorAll('.options .option').forEach(opt=>{
-      opt.addEventListener('click', (e)=>{
-        const parent = opt.closest('.question');
-        parent.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
-        opt.classList.add('selected');
-      });
-    });
-
-    document.getElementById('submitQuiz').addEventListener('click', ()=>{
-      let score = 0, total = Object.keys(answers).length;
-      const results = {};
-      document.querySelectorAll('.question').forEach(q=>{
-        const qn = q.dataset.q;
-        const selected = q.querySelector('.option.selected');
-        const fb = q.querySelector('.feedback');
-        if(!selected){
-          fb.innerHTML = '<span class="muted">No seleccionaste una opción.</span>';
-          results[qn] = { selected: null, correct: answers[qn] };
-        } else {
-          const val = selected.dataset.value;
-          results[qn] = { selected: val, correct: answers[qn] };
-          if(val === answers[qn]){ score++; fb.innerHTML = '<strong style="color:var(--success)">Correcto</strong>'; }
-          else { fb.innerHTML = '<strong style="color:var(--danger)">Incorrecto</strong> — Revisar material.'; }
-        }
-      });
-      const pct = Math.round((score/total)*100);
-      const text = `Puntaje: ${score}/${total} (${pct}%)`;
-      document.getElementById('quizScore').textContent = text;
-      // store last results for export
-      window.lastQuizResult = { score, total, pct, details: results, timestamp: (new Date()).toISOString() };
-      // accessible focus
-      document.getElementById('quizScore').focus();
-    });
-
-    document.getElementById('resetQuiz').addEventListener('click', ()=>{
-      document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
-      document.querySelectorAll('.feedback').forEach(f=>f.innerHTML='');
-      document.getElementById('quizScore').textContent = '';
-      window.lastQuizResult = null;
-    });
-
-    // Export results as JSON (download)
-    document.getElementById('exportResults').addEventListener('click', ()=>{
-      const res = window.lastQuizResult || { score:null, total:null, pct:null, details:null, timestamp:(new Date()).toISOString() };
-      const payload = {
-        user: { id: null, name: null }, // opcional; el LMS puede inyectar datos si lo desea
-        module: 'Actos Urgentes de Comprobación (AUC)',
-        result: res
-      };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-      const dl = document.createElement('a');
-      dl.setAttribute('href', dataStr);
-      const fname = 'resultado_quiz_auc_' + (new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-') + '.json';
-      dl.setAttribute('download', fname);
-      document.body.appendChild(dl);
-      dl.click();
-      dl.remove();
-    });
-
-    // Start button behaviour
-    document.getElementById('btnStart').addEventListener('click', ()=>{
-      activateTab('intro');
-      // smooth scroll
-      document.querySelector('.container').scrollIntoView({behavior:'smooth'});
-    });
-
-    // small accessibility improvements
-    // allow tab navigation and Enter to activate tabs handled above
-    // focus management for sections: shift focus to first heading when tab changes
-    document.querySelectorAll('.tab').forEach(t=>{
-      t.addEventListener('click', ()=>{
-        setTimeout(()=>{
-          const sec = document.querySelector('.section.active h3');
-          if(sec) sec.focus = -1;
-        }, 200);
-      });
-    });
-
-    // initial state: place all items in left area (done by markup)
-  </script>
 </body>
 </html>
